@@ -43,22 +43,28 @@ export default function App() {
 
     if (!genre || !mood || !level) return;
 
-     try {
+    try {
+    const GEMINI_API_KEY = 'AIzaSyCENSfDNcHbxUQYAupRtOibe-TWMcK0xDA';
 
-      const GEMINI_API_KEY = 'AIzaSyAaitFnIuiRbEjr7EcmMq9Ieg5LQJzAs2I';
-      const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=" +
-        GEMINI_API_KEY,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `Recommend 6 books for a ${level} ${genre} reader feeling ${mood}. Explain why.` }] }]
-          })
-        }
-      )
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
+  {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${GEMINI_API_KEY}` 
+    },
+    body: JSON.stringify({
+      prompt: {
+        text: `Recommend 6 books for a ${level} ${genre} reader feeling ${mood}. Explain why.`
+      },
+      temperature: 0.7,
+      candidate_count: 6
+    })
+  }
+);
 
-       const data = await response.json()
+   const data = await response.json()
 
     dispatch({
       type: "Set_aiResponses",
@@ -70,7 +76,7 @@ export default function App() {
   }, [state])
   
   useEffect(() => {
-    fetchRecommendations()
+     fetchRecommendations()
   }, [fetchRecommendations])
   
   return(
