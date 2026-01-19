@@ -39,32 +39,34 @@ export default function App() {
 
    const fetchRecommendations = useCallback(async() => {
 
-    const { genre, mood, level } = state;
+   const { genre, mood, level } = state;
 
     if (!genre || !mood || !level) return;
 
     try {
-    const GEMINI_API_KEY = 'AIzaSyCENSfDNcHbxUQYAupRtOibe-TWMcK0xDA';
+   const GEMINI_API_KEY = 'AIzaSyAJOWFONwEW6E4JHy__5peI9KIy0Z64Ch0';
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
+   const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}` ,
   {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${GEMINI_API_KEY}` 
     },
     body: JSON.stringify({
-      prompt: {
-        text: `Recommend 6 books for a ${level} ${genre} reader feeling ${mood}. Explain why.`
-      },
-      temperature: 0.7,
-      candidate_count: 6
-    })
-  }
-);
+    
+     contents: [
+    {
+      parts: [
+        { text: `Recommend 6 books for a ${level} ${genre} reader feeling ${mood}. Explain why.` }
+      ]
+    }
+  ]
+})
+})
 
    const data = await response.json()
+    console.log(data)
 
     dispatch({
       type: "Set_aiResponses",
@@ -80,8 +82,8 @@ export default function App() {
   }, [fetchRecommendations])
   
   return(
-       <section>
-        <h1>Book Recommender</h1>
+    <section>
+       <h1>Book Recommender</h1>
        <SelectField
         placeholder="Select a genre"
         id="genre"
@@ -97,7 +99,7 @@ export default function App() {
         id="mood"
         options={availableMoodBasedOnGenre}
         value={state.mood}
-         onSelect={(value) =>
+        onSelect={(value) =>
         dispatch ({type: "Set_Mood" , payload: value})
          }
         />
@@ -118,14 +120,14 @@ export default function App() {
 
       <br />
       <br />
-    
+
      {state.aiResponses.map((recommend, index) => (
         <details key={index}>
           <summary>Recommendation {index + 1}</summary>
-          <p>{recommend?.content?.[0]?.text}</p>
+          <p>{recommend?.content?.parts?.[0]?.text}</p>
         </details>
       ))}
-      </section>
+  </section>
      )
       };
   
