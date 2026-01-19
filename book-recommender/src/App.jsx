@@ -92,8 +92,8 @@ export default function App() {
   }, [fetchRecommendations])
   
   return(
-    <section>
-       <h1>Book Recommender</h1>
+    <section className="app-container">
+       <h1>AI Book Recommender</h1>
        <SelectField
         placeholder="Select a genre"
         id="genre"
@@ -139,7 +139,7 @@ export default function App() {
             <p> Finding the best books for you...</p>
           </div>
         ) : 
-        
+
         (state.aiResponses.map((recommend, index) => (
         <details key={index}>
           <summary>Recommendation {index + 1}</summary>
