@@ -16,8 +16,11 @@ const reducer = (state, action) => {
     case "Set_Level":
       return { ...state, level: action.payload, }
     
+    case "Set_Loading":
+      return { ...state, isLoading: action.payload };
+
     case "Set_aiResponses":
-      return { ...state, aiResponses: action.payload || []}
+      return { ...state, aiResponses: action.payload, isLoading:false}
       default:
       return state;
   }
@@ -35,7 +38,9 @@ export default function App() {
    )
 
    const availableMoodBasedOnGenre =
-    listofMoodOption[state.genre] || []
+     (state.genre && listofMoodOption[state.genre]) 
+    ? listofMoodOption[state.genre] 
+    : [];
 
    const fetchRecommendations = useCallback(async() => {
 
@@ -44,7 +49,7 @@ export default function App() {
     if (!genre || !mood || !level) return;
 
     try {
-   const GEMINI_API_KEY = 'AIzaSyAJOWFONwEW6E4JHy__5peI9KIy0Z64Ch0';
+   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
    const response = await fetch(
         `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}` ,
@@ -65,8 +70,12 @@ export default function App() {
 })
 })
 
+ if (!response.ok) {
+    const errorData = await response.json();
+    throw Error(errorData.error?.message || "API Request Failed");
+ }
+
    const data = await response.json()
-    console.log(data)
 
     dispatch({
       type: "Set_aiResponses",
@@ -74,6 +83,7 @@ export default function App() {
     })
    } catch (err) {
       console.log(err);
+      dispatch({ type: "Set_Loading", payload: false })
     }
   }, [state])
   
@@ -116,17 +126,26 @@ export default function App() {
 
       <br />
          
-        <button onClick={fetchRecommendations}>Get Recommendation</button>
+        <button className="fetch-button"
+        disabled={state.isLoading || !state.genre || !state.mood || !state.level} 
+         onClick={fetchRecommendations}>Get Recommendation</button>
 
       <br />
       <br />
 
-     {state.aiResponses.map((recommend, index) => (
+
+     {state.isLoading ? (
+          <div className="loading-state">
+            <p> Finding the best books for you...</p>
+          </div>
+        ) : 
+        
+        (state.aiResponses.map((recommend, index) => (
         <details key={index}>
           <summary>Recommendation {index + 1}</summary>
-          <p>{recommend?.content?.parts?.[0]?.text}</p>
+          <p>{recommend?.content?.parts?.[0]?.text || "No recommendations found."}</p>
         </details>
-      ))}
+      )))}
   </section>
      )
       };
