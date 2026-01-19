@@ -33,26 +33,30 @@ export default function App() {
     genre: "",
     mood: "",
     level: "",
+    isLoading: false,
     aiResponses: [] 
+    
     }
    )
 
+   const { genre, mood, level } = state;
+
    const availableMoodBasedOnGenre =
-     (state.genre && listofMoodOption[state.genre]) 
-    ? listofMoodOption[state.genre] 
+     (genre && listofMoodOption[genre]) 
+    ? listofMoodOption[genre] 
     : [];
 
    const fetchRecommendations = useCallback(async() => {
 
-   const { genre, mood, level } = state;
-
     if (!genre || !mood || !level) return;
+
+    dispatch({ type: "Set_Loading", payload: true });
 
     try {
    const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}` ,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}` ,
   {
     method: "POST",
     headers: { 
@@ -85,12 +89,14 @@ export default function App() {
       console.log(err);
       dispatch({ type: "Set_Loading", payload: false })
     }
-  }, [state])
+  }, [genre, mood, level])
   
-  useEffect(() => {
-     fetchRecommendations()
-  }, [fetchRecommendations])
-  
+ useEffect(() => {
+    if (genre && mood && level) {
+      fetchRecommendations();
+    }
+  }, [genre, mood, level, fetchRecommendations]);
+
   return(
     <section className="app-container">
        <h1>AI Book Recommender</h1>
