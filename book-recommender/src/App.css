@@ -84,6 +84,19 @@ button:focus-visible {
   animation: pulse 1.5s infinite;
 }
 
+details summary {
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.ai-responses {
+  color: black;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
    color: #213547;
